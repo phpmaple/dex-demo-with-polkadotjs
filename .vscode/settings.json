@@ -1,0 +1,11 @@
+{
+	"workbench.colorCustomizations": {
+        "tab.unfocusedActiveBorder": "#fff0"
+    },
+	"eslint.validate": [
+		"javascript",
+		"javascriptreact",
+		{ "language": "typescript", "autoFix": true },
+		{ "language": "typescriptreact", "autoFix": true }
+	]
+}
