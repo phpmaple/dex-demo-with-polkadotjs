@@ -1,7 +1,7 @@
 {
 	"workbench.colorCustomizations": {
-        "tab.unfocusedActiveBorder": "#fff0"
-    },
+		"tab.unfocusedActiveBorder": "#fff0"
+	},
 	"eslint.validate": [
 		"javascript",
 		"javascriptreact",
