@@ -24,7 +24,8 @@ import ApiUtils, {
   OrderStatus,
   Trade,
   OrderLinkedItem,
-  PairBalance
+  PairBalance,
+  AccountIds
 } from './services/APIService';
 
 const { Content } = Layout;
@@ -191,15 +192,14 @@ export default () => {
 
   // create demo
   async function createTokenAndTradePair() {
-    // const baseResult = await api.issueToken('0x80', 6000000)
-    // const quoteResult = await api.issueToken('0x90', 6000000)
-    // const tpResult = await api.createTradePair(baseResult[1], quoteResult[1])
-    // for (const account of AccountIds) {
-    //   await api.transferTo(account, baseResult[1], 100000)
-    //   await api.transferTo(account, quoteResult[1], 100000)
-    // }
-    // return tpResult[2].hash
-    return '';
+    const baseResult = await api.issueToken('0x80', 6000000);
+    const quoteResult = await api.issueToken('0x90', 6000000);
+    const tpResult = await api.createTradePair(baseResult[1], quoteResult[1]);
+    for (const account of AccountIds) {
+      await api.transferTo(account, baseResult[1], 100000);
+      await api.transferTo(account, quoteResult[1], 100000);
+    }
+    return tpResult[2].hash;
   }
 
   const generatePair = async () => {
