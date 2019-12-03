@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  web3Accounts,
+  web3Enable,
+  web3FromAddress
+} from "@polkadot/extension-dapp";
+
 import {
   Layout,
   Input,
@@ -9,15 +15,15 @@ import {
   Col,
   Card,
   message
-} from 'antd';
-import { Option, Struct, H256, u128 as U128 } from '@polkadot/types';
-import OrderBook from './components/OrderBook';
-import TradeHistory, { TradeItem } from './components/TradeHistory';
-import MyOpenedOrders, { OrderItem } from './components/MyOpenedOrders';
-import MyOrders from './components/MyOrders';
-import MyTrades from './components/MyTrades';
+} from "antd";
+import { Option, Struct, H256, u128 as U128 } from "@polkadot/types";
+import OrderBook from "./components/OrderBook";
+import TradeHistory, { TradeItem } from "./components/TradeHistory";
+import MyOpenedOrders, { OrderItem } from "./components/MyOpenedOrders";
+import MyOrders from "./components/MyOrders";
+import MyTrades from "./components/MyTrades";
 
-import OrderCreate from './components/OrderCreate';
+import OrderCreate from "./components/OrderCreate";
 import ApiUtils, {
   TradePair,
   Order,
@@ -26,14 +32,14 @@ import ApiUtils, {
   OrderLinkedItem,
   PairBalance,
   AccountIds
-} from './services/APIService';
+} from "./services/APIService";
 
 const { Content } = Layout;
 
 const api = new ApiUtils();
 
-export default () => {
-  const [tradePair, setTradePair] = useState('');
+export const App: React.FC = () => {
+  const [tradePair, setTradePair] = useState("");
   const [tpObject, setTpObject] = useState<TradePair | undefined>(undefined);
   const [myOpenedOrders, setMyOpenedOrders] = useState<OrderItem[]>([]);
   const [myOrders, setMyOrders] = useState<OrderItem[]>([]);
@@ -49,40 +55,51 @@ export default () => {
     new U128(0)
   ]);
 
-  async function fetchTradePair() {
+  const fetchTradePairCallback = useCallback(
+  async () => {
     const tp = (await api.tradePairObject(tradePair)) as Option<Struct>;
 
-    if (!tp.isNone) {
+    if (tp && !tp.isNone) {
       const newTpObject = JSON.parse(tp.unwrap().toString()) as TradePair;
 
       setTpObject({ ...newTpObject });
     }
-  }
+  },
+  [tradePair],
+);
+
 
   useEffect(() => {
     (async () => {
+      // await web3Enable("my cool dapp");
+      // const allAccounts = await web3Accounts();
+
       await api.init();
+      // if (allAccounts.length > 0) {
+      //   const injector = await web3FromAddress(allAccounts[0].address);
+      //   api.setSigner(injector.signer);
+      // }
     })();
   }, []);
 
   useEffect(() => {
     const unsub = api.subNewBlock()?.subscribe(async () => {
-      await fetchTradePair();
+      await fetchTradePairCallback();
     });
     return () => {
       if (unsub) {
         unsub.unsubscribe();
       }
     };
-  }, [tradePair]);
+  }, [fetchTradePairCallback, tradePair]);
 
   useEffect(() => {
     (async () => {
-      if (tradePair !== '') {
-        await fetchTradePair();
+      if (tradePair !== "") {
+        await fetchTradePairCallback();
       }
     })();
-  }, [tradePair]);
+  }, [fetchTradePairCallback, tradePair]);
 
   useEffect(() => {
     (async () => {
@@ -93,7 +110,6 @@ export default () => {
           newTpObject.hash
         );
         setOrderBooks([sellOrders, buyOrders]);
-        console.log(sellOrders, buyOrders);
 
         // my balance
         const balances = await api.queryBalance(
@@ -191,34 +207,67 @@ export default () => {
   }, [tpObject]);
 
   // create demo
-  async function createTokenAndTradePair() {
-    const baseResult = await api.issueToken('0x80', 6000000);
-    const quoteResult = await api.issueToken('0x90', 6000000);
-    const tpResult = await api.createTradePair(baseResult[1], quoteResult[1]);
-    for (const account of AccountIds) {
-      await api.transferTo(account, baseResult[1], 100000);
-      await api.transferTo(account, quoteResult[1], 100000);
+  async function createTokenAndTradePair(): Promise<string | null> {
+    const nonce = (await api.nonce())?.toNumber();
+    if (nonce === undefined) {
+      return null
     }
+    const [baseResult, quoteResult] = await Promise.all([
+      api.issueToken("0x90", 6000000, nonce),
+      api.issueToken("0x80", 6000000, nonce + 1)
+    ]);
+    const tpResult = await api.createTradePair(baseResult[1], quoteResult[1]);
+    console.log(tpResult);
+
+    const promiseAll: Promise<unknown>[] = [];
+
+    const nextNonce = (await api.nonce())?.toNumber();
+    if (nextNonce === undefined) {
+      return null;
+    }
+    AccountIds.forEach((account, index) => {
+      promiseAll.push(
+        api.transferTo(account, baseResult[1], 100000, nextNonce + index * 2)
+      );
+      promiseAll.push(
+        api.transferTo(
+          account,
+          quoteResult[1],
+          100000,
+          nextNonce + index * 2 + 1
+        )
+      );
+    });
+
+    await Promise.all(promiseAll);
+    console.log(tpResult[2].hash);
+
     return tpResult[2].hash;
   }
 
-  const generatePair = async () => {
+  const generatePair = async (): Promise<void> => {
     message.loading({
-      content: 'Action in progress..',
+      content: "Action in progress..",
       key: generatePair.name,
       duration: 0
     });
     const pair = await createTokenAndTradePair();
-    setTradePair(pair);
+    if (pair) {
+      setTradePair(pair);
+    }
     message.success({
-      content: 'trade pair created success..',
+      content: "trade pair created success..",
       key: generatePair.name
     });
   };
 
-  const createOrder = async (type: number, price: number, amount: number) => {
+  const createOrder = async (
+    type: number,
+    price: number,
+    amount: number
+  ): Promise<void> => {
     message.loading({
-      content: 'Action in progress..',
+      content: "Action in progress..",
       key: createOrder.name,
       duration: 0
     });
@@ -231,40 +280,40 @@ export default () => {
       amount
     );
 
-    await fetchTradePair();
+    await fetchTradePairCallback();
     message.success({
-      content: 'limit order created success..',
+      content: "limit order created success..",
       key: createOrder.name
     });
   };
 
-  const cancelOrder = async (hash: string) => {
+  const cancelOrder = async (hash: string): Promise<void> => {
     message.loading({
-      content: 'Action in progress..',
+      content: "Action in progress..",
       key: createOrder.name,
       duration: 0
     });
 
     await api.cancelOrder(hash);
-    await fetchTradePair();
+    await fetchTradePairCallback();
     message.success({
-      content: 'Order canceled success..',
+      content: "Order canceled success..",
       key: createOrder.name
     });
   };
 
-  const accountChanged = async (index: number) => {
+  const accountChanged = async (index: number): Promise<void> => {
     ApiUtils.switchAccount(index);
 
-    await fetchTradePair();
+    await fetchTradePairCallback();
   };
 
   return (
-    <Layout style={{ height: '100vh' }}>
-      <div style={{ marginTop: '20px', display: 'flex' }}>
+    <Layout style={{ height: "100vh" }}>
+      <div style={{ marginTop: "20px", display: "flex" }}>
         <div
           style={{
-            margin: 'auto 20px'
+            margin: "auto 20px"
           }}
         >
           TradePair Hash :
@@ -272,9 +321,9 @@ export default () => {
         <Input
           value={tradePair}
           onChange={e => setTradePair(e.target.value)}
-          style={{ width: '500px' }}
+          style={{ width: "500px" }}
           size="large"
-          prefix={<Icon type="number" style={{ color: 'rgba(0,0,0,.25)' }} />}
+          prefix={<Icon type="number" style={{ color: "rgba(0,0,0,.25)" }} />}
           type="hash"
           placeholder="hash"
         />
@@ -283,7 +332,7 @@ export default () => {
           type="primary"
           shape="circle"
           icon="plus-circle"
-          style={{ margin: 'auto 10px', marginRight: '40px' }}
+          style={{ margin: "auto 10px", marginRight: "40px" }}
         />
         <OrderCreate
           pairBalance={pairBalance}
@@ -298,15 +347,15 @@ export default () => {
         type="flex"
         justify="center"
         align="stretch"
-        style={{ margin: '20px 50px' }}
+        style={{ margin: "20px 50px" }}
       >
         <Col span={8}>
-          <Card style={{ height: '100%' }} size="small">
+          <Card style={{ height: "100%" }} size="small">
             <Statistic
               title="Latest Price"
               value={
                 tpObject === undefined
-                  ? '--'
+                  ? "--"
                   : tpObject.latest_matched_price / 10 ** 8
               }
             />
@@ -318,7 +367,7 @@ export default () => {
               title="24h High"
               value={
                 tpObject === undefined
-                  ? '--'
+                  ? "--"
                   : tpObject.one_day_highest_price / 10 ** 8
               }
             />
@@ -326,18 +375,18 @@ export default () => {
               title="24h Low"
               value={
                 tpObject === undefined
-                  ? '--'
+                  ? "--"
                   : tpObject.one_day_lowest_price / 10 ** 8
               }
             />
           </Card>
         </Col>
         <Col span={8}>
-          <Card style={{ height: '100%' }} size="small">
+          <Card style={{ height: "100%" }} size="small">
             <Statistic
               title="24h Volume"
               value={
-                tpObject === undefined ? '--' : tpObject.one_day_trade_volume
+                tpObject === undefined ? "--" : tpObject.one_day_trade_volume
               }
             />
           </Card>
@@ -345,9 +394,9 @@ export default () => {
       </Row>
       <Content
         style={{
-          padding: '0 24px',
-          margin: '16px 0',
-          display: 'flex'
+          padding: "0 24px",
+          margin: "16px 0",
+          display: "flex"
         }}
       >
         <OrderBook
@@ -357,15 +406,15 @@ export default () => {
             tpObject === undefined ? 0 : tpObject.latest_matched_price
           }
         />
-        <div style={{ width: '100px' }} />
+        <div style={{ width: "100px" }} />
         <TradeHistory data={trades} />
-        <div style={{ width: '100px' }} />
+        <div style={{ width: "100px" }} />
         <MyOpenedOrders data={myOpenedOrders} cancelCallback={cancelOrder} />
-        <div style={{ width: '100px' }} />
+        <div style={{ width: "100px" }} />
         <MyOrders data={myOrders} />
-        <div style={{ width: '100px' }} />
+        <div style={{ width: "100px" }} />
         <MyTrades data={myTrades} />
-        <div style={{ width: '100px' }} />
+        <div style={{ width: "100px" }} />
       </Content>
     </Layout>
   );

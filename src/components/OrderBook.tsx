@@ -1,17 +1,17 @@
-import React from 'react';
-import { Table } from 'antd';
-import { ColumnProps } from 'antd/es/table';
-import BN from 'bn.js';
-import { OrderLinkedItem } from '../services/APIService';
+import React from 'react'
+import { Table } from 'antd'
+import { ColumnProps } from 'antd/es/table'
+import BN from 'bn.js'
+import { OrderLinkedItem } from '../services/APIService'
 
 interface Props {
-  buyOrders: OrderLinkedItem[];
-  sellOrders: OrderLinkedItem[];
-  lastestPrice: number;
+  buyOrders: OrderLinkedItem[]
+  sellOrders: OrderLinkedItem[]
+  lastestPrice: number
 }
 
 export default (props: Props) => {
-  const { buyOrders, sellOrders, lastestPrice } = props;
+  const { buyOrders, sellOrders, lastestPrice } = props
 
   const sellColumns: ColumnProps<OrderLinkedItem>[] = [
     {
@@ -32,7 +32,7 @@ export default (props: Props) => {
         <span style={{ color: 'red' }}>{price / 10 ** 8}</span>
       )
     }
-  ];
+  ]
 
   const buyColumns: ColumnProps<OrderLinkedItem>[] = [
     {
@@ -53,7 +53,7 @@ export default (props: Props) => {
         <span style={{ color: 'green' }}>{price / 10 ** 8}</span>
       )
     }
-  ];
+  ]
 
   return (
     <div>
@@ -84,5 +84,5 @@ export default (props: Props) => {
         bordered={false}
       />
     </div>
-  );
-};
+  )
+}

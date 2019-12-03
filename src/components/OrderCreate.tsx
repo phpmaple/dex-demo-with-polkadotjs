@@ -1,119 +1,117 @@
-import React, { FormEvent } from 'react';
-import { FormComponentProps } from 'antd/es/form';
-import { Form, Icon, InputNumber, Button, Radio, Select } from 'antd';
-import { RadioChangeEvent } from 'antd/lib/radio';
-import _ from 'lodash';
-import BN from 'bn.js';
-import { bool } from '@polkadot/types';
-import { TradePair, PairBalance } from '../services/APIService';
+import React, { FormEvent } from 'react'
+import { FormComponentProps } from 'antd/es/form'
+import { Form, InputNumber, Button, Radio, Select } from 'antd'
+import { RadioChangeEvent } from 'antd/lib/radio'
+import { TradePair, PairBalance } from '../services/APIService'
 
-const { Option } = Select;
+const { Option } = Select
 
 interface OrderCreateFormProps extends FormComponentProps {
-  price: number;
-  amount: number;
-  pairBalance: PairBalance;
-  onsubmit: (type: number, price: number, amount: number) => void;
-  tradePairExist: TradePair | undefined;
-  accountChanged: (index: number) => void;
+  price: number
+  amount: number
+  pairBalance: PairBalance
+  onsubmit: (type: number, price: number, amount: number) => void
+  tradePairExist: TradePair | undefined
+  accountChanged: (index: number) => void
 }
 
 function hasErrors(fieldsError: Record<string, string[] | undefined>) {
-  return Object.keys(fieldsError).some(field => fieldsError[field]);
+  return Object.keys(fieldsError).some(field => fieldsError[field])
 }
 
-class OrderCreate extends React.Component<OrderCreateFormProps, any> {
+interface State {
+  type: number
+}
+
+class OrderCreate extends React.Component<OrderCreateFormProps, State> {
   constructor(props: OrderCreateFormProps) {
-    super(props);
+    super(props)
     this.state = {
       type: 1
-    };
+    }
   }
 
   componentDidMount() {
-    const { form } = this.props;
+    const { form } = this.props
 
     // To disabled submit button at the beginning.
-    form.validateFields();
+    form.validateFields()
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputValidator = (rule: any, value: any, callback: any) => {
-    const { form } = this.props;
-    const { type } = this.state;
-    const { isFieldTouched } = form;
-    const price = form.getFieldValue('price');
-    const amount = form.getFieldValue('amount');
-    const orderType = type === 1 ? 'sell' : 'buy';
+    const { form } = this.props
+    const { type } = this.state
+    const { isFieldTouched } = form
+    const price = form.getFieldValue('price')
+    const amount = form.getFieldValue('amount')
+    const orderType = type === 1 ? 'sell' : 'buy'
 
     if (!isFieldTouched('price') || !isFieldTouched('amount')) {
-      callback();
-      return;
+      callback()
+      return
     }
     if (!Number.isInteger(amount)) {
-      callback(`${orderType} amount is not integer`);
+      callback(`${orderType} amount is not integer`)
     } else if (!Number.isInteger(price * amount)) {
-      callback(`${orderType === 'buy' ? 'sell' : 'buy'} amount is not integer`);
+      callback(`${orderType === 'buy' ? 'sell' : 'buy'} amount is not integer`)
     } else {
-      callback();
+      callback()
     }
-  };
+  }
 
   handleSubmit = (e: FormEvent) => {
-    const { form, onsubmit } = this.props;
-    const { type } = this.state;
+    const { form, onsubmit } = this.props
+    const { type } = this.state
 
-    e.preventDefault();
+    e.preventDefault()
     form.validateFields((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
-        onsubmit(type, values.price, values.amount);
-        form.resetFields();
-        form.validateFields();
+        onsubmit(type, values.price, values.amount)
+        form.resetFields()
+        form.validateFields()
       }
-    });
-  };
+    })
+  }
 
-  accountChanged = (
-    v: number,
-    option: React.ReactElement<any> | React.ReactElement<any>[]
-  ) => {
-    const { accountChanged } = this.props;
-    accountChanged(v);
-  };
+  accountChanged = (v: number) => {
+    const { accountChanged } = this.props
+    accountChanged(v)
+  }
 
   onRadioChange = (e: RadioChangeEvent) => {
-    const { form } = this.props;
+    const { form } = this.props
 
     this.setState(
       {
         type: e.target.value
       },
       () => {
-        form.validateFields(['amount'], { force: true });
+        form.validateFields(['amount'], { force: true })
       }
-    );
-  };
+    )
+  }
 
-  onPriceChange = (value: number | undefined) => {
-    const { form } = this.props;
+  onPriceChange = () => {
+    const { form } = this.props
 
-    form.validateFields(['amount'], { force: true });
-  };
+    form.validateFields(['amount'], { force: true })
+  }
 
   render() {
-    const { form, pairBalance, tradePairExist } = this.props;
-    const { type } = this.state;
+    const { form, pairBalance, tradePairExist } = this.props
+    const { type } = this.state
 
     const {
       getFieldDecorator,
       getFieldsError,
       getFieldError,
       isFieldTouched
-    } = form;
+    } = form
 
     // Only show error after a field is touched.
-    const priceError = isFieldTouched('price') && getFieldError('price');
-    const amountError = isFieldTouched('amount') && getFieldError('amount');
+    const priceError = isFieldTouched('price') && getFieldError('price')
+    const amountError = isFieldTouched('amount') && getFieldError('amount')
 
     return (
       <div>
@@ -214,10 +212,10 @@ class OrderCreate extends React.Component<OrderCreateFormProps, any> {
           </Form.Item>
         </Form>
       </div>
-    );
+    )
   }
 }
 
 export default Form.create<OrderCreateFormProps>({
   // ...
-})(OrderCreate);
+})(OrderCreate)

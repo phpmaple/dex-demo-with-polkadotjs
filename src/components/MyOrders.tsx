@@ -1,20 +1,20 @@
-import React from 'react';
-import { Table } from 'antd';
-import { ColumnProps } from 'antd/es/table';
-import BN from 'bn.js';
-import { OrderType, Order, OrderStatus } from '../services/APIService';
+import React from 'react'
+import { Table } from 'antd'
+import { ColumnProps } from 'antd/es/table'
+import BN from 'bn.js'
+import { OrderType, Order, OrderStatus } from '../services/APIService'
 
 export interface OrderItem {
-  key: number;
-  order: Order;
+  key: number
+  order: Order
 }
 
 interface Props {
-  data: OrderItem[];
+  data: OrderItem[]
 }
 
 export default (props: Props) => {
-  const { data } = props;
+  const { data } = props
 
   const columns: ColumnProps<OrderItem>[] = [
     {
@@ -57,7 +57,7 @@ export default (props: Props) => {
         </span>
       )
     }
-  ];
+  ]
 
   return (
     <div>
@@ -70,5 +70,5 @@ export default (props: Props) => {
         pagination={false}
       />
     </div>
-  );
-};
+  )
+}

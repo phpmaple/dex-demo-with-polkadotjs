@@ -1,8 +1,6 @@
-import { createGlobalStyle } from 'styled-components';
-import { normalize } from 'styled-normalize';
+import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
-  ${normalize}
 
   // You can continue writing global styles here
   body {
@@ -10,4 +8,4 @@ export const GlobalStyle = createGlobalStyle`
     /* background-color: black; */
   }
 
-`;
+`

@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import { App } from './app';
 import { GlobalStyle } from './styles';
 
-const Root = () => (
+const Root: React.SFC = () => (
   <>
     <GlobalStyle />
     <App />

@@ -1,19 +1,19 @@
-import React from 'react';
-import { Table } from 'antd';
-import { ColumnProps } from 'antd/es/table';
-import ApiUtils, { Trade } from '../services/APIService';
+import React from 'react'
+import { Table } from 'antd'
+import { ColumnProps } from 'antd/es/table'
+import ApiUtils, { Trade } from '../services/APIService'
 
 export interface TradeItem {
-  key: number;
-  trade: Trade;
+  key: number
+  trade: Trade
 }
 
 interface Props {
-  data: TradeItem[];
+  data: TradeItem[]
 }
 
 export default (props: Props) => {
-  const { data } = props;
+  const { data } = props
 
   const columns: ColumnProps<TradeItem>[] = [
     {
@@ -42,7 +42,7 @@ export default (props: Props) => {
         </span>
       )
     }
-  ];
+  ]
 
   return (
     <div>
@@ -55,5 +55,5 @@ export default (props: Props) => {
         pagination={false}
       />
     </div>
-  );
-};
+  )
+}

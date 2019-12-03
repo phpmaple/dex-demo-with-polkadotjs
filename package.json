@@ -4,6 +4,9 @@
   "private": true,
   "dependencies": {
     "@polkadot/api": "^0.96.1",
+    "@polkadot/extension-dapp": "^0.13.1",
+    "@polkadot/rpc-provider": "^0.96.1",
+    "@polkadot/types": "^0.96.1",
     "@polkadot/ui-keyring": "^0.46.1",
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.1",
@@ -19,16 +22,16 @@
     "react-app-rewired": "^2.1.5",
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0",
-    "react-trading-ui": "^0.1.5",
     "rxjs": "^6.5.3",
     "styled-components": "^4.4.0",
-    "styled-normalize": "^8.0.6",
     "typescript": "^3.7.2"
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
+    "lint": "eslint src/** --ext .ts,.tsx",
+    "lint:fix": "yarn lint --fix",
     "eject": "react-app-rewired eject"
   },
   "eslintConfig": {
@@ -47,9 +50,33 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-do-expressions": "^7.6.0",
+    "@babel/plugin-proposal-logical-assignment-operators": "^7.2.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
     "@babel/plugin-proposal-optional-chaining": "^7.6.0",
+    "@babel/plugin-proposal-pipeline-operator": "^7.5.0",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-typescript": "^7.7.4",
     "@types/lodash": "^4.14.145",
-    "cross-env": "^6.0.3"
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.8.0",
+    "cross-env": "^6.0.3",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-typescript": "^6.3.1",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-react-app": "^5.0.2",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-eslint-comments": "^3.1.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^23.0.4",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.15.1",
+    "eslint-plugin-unicorn": "^13.0.0",
+    "prettier": "^1.19.1"
   }
 }
