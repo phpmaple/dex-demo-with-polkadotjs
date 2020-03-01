@@ -10,6 +10,7 @@ import { Balance, Index, SetIndex } from '@polkadot/types/interfaces'
 import { switchMap, first, map, filter, tap, takeWhile } from 'rxjs/operators'
 import { combineLatest } from 'rxjs/internal/observable/combineLatest'
 import RuntimeTypes from '../runtimeTypes'
+import { Registry } from '@polkadot/types/types'
 
 export type Price = u128
 export type Hash = H256
@@ -135,6 +136,10 @@ export default class ApiUtils {
     if (this.api) { this.api.setSigner(signer);}
   }
 
+  public get registry(): Registry | undefined {
+    return this.api ? this.api.registry : undefined;
+  }
+
   public async init() {
     const provider = new WsProvider(this.url)
 
@@ -243,18 +248,6 @@ export default class ApiUtils {
       .toPromise()
   }
 
-  async tpOwnedTrades(hash: string) {
-    return new Promise(resolve => {
-      if (this.api) {
-      this.api.query.tradeModule
-        .tradePairOwnedTrades(hash)
-        .subscribe((v: unknown) => {
-          resolve(v)
-        })
-      }
-    })
-  }
-
   async ordersWith(hash: string[]) {
     return new Promise(resolve => {
       if (this.api) {
@@ -279,12 +272,13 @@ export default class ApiUtils {
     return new Promise(resolve => {
       const account = ApiUtils.getPairFrom()
       if (this.api) {
-      this.api.tx.tradeModule
-        .cancelLimitOrder(hash)
-        .signAndSend(account)
-        .subscribe(value => {
-          ApiUtils.handlerSubResult(value, resolve)
-        })
+        console.log("cancel orde hash: ", hash);
+        this.api.tx.tradeModule
+          .cancelLimitOrder(hash)
+          .signAndSend(account)
+          .subscribe(value => {
+            ApiUtils.handlerSubResult(value, resolve)
+          })
       }
     })
   }

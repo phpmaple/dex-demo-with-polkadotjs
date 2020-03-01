@@ -9,7 +9,7 @@ const { Option } = Select
 interface OrderCreateFormProps extends FormComponentProps {
   price: number
   amount: number
-  pairBalance: PairBalance
+  pairBalance: PairBalance | undefined
   onsubmit: (type: number, price: number, amount: number) => void
   tradePairExist: TradePair | undefined
   accountChanged: (index: number) => void
@@ -133,19 +133,19 @@ class OrderCreate extends React.Component<OrderCreateFormProps, State> {
         </Select>
         <span style={{ margin: 'auto 20px' }}>
           Base Free Balance:
-          {pairBalance[0].toNumber() === 0 ? '--' : pairBalance[0].toString()}
+          {(!pairBalance || (pairBalance[0].toNumber() === 0)) ? '--' : pairBalance[0].toString()}
         </span>
         <span style={{ margin: 'auto 20px' }}>
           Quote Free Balance:
-          {pairBalance[2].toNumber() === 0 ? '--' : pairBalance[2].toString()}
+          {(!pairBalance || (pairBalance[2].toNumber() === 0)) ? '--' : pairBalance[2].toString()}
         </span>
         <span style={{ margin: 'auto 20px' }}>
           Base Freezed Balance:
-          {pairBalance[1].toNumber() === 0 ? '--' : pairBalance[1].toString()}
+          {(!pairBalance || (pairBalance[1].toNumber() === 0)) ? '--' : pairBalance[1].toString()}
         </span>
         <span style={{ margin: 'auto 20px' }}>
           Quote Freezed Balance:
-          {pairBalance[3].toNumber() === 0 ? '--' : pairBalance[3].toString()}
+          {(!pairBalance || (pairBalance[3].toNumber() === 0)) ? '--' : pairBalance[3].toString()}
         </span>
 
         <Form layout="inline" onSubmit={this.handleSubmit}>

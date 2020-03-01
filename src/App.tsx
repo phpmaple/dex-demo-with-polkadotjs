@@ -16,7 +16,7 @@ import {
   Card,
   message
 } from "antd";
-import { Option, Struct, H256, u128 as U128 } from "@polkadot/types";
+import { Option, Struct, H256, u128 as U128, TypeRegistry } from "@polkadot/types";
 import OrderBook from "./components/OrderBook";
 import TradeHistory, { TradeItem } from "./components/TradeHistory";
 import MyOpenedOrders, { OrderItem } from "./components/MyOpenedOrders";
@@ -48,19 +48,15 @@ export const App: React.FC = () => {
   const [orderBooks, setOrderBooks] = useState<
     [OrderLinkedItem[], OrderLinkedItem[]]
   >([[], []]);
-  const [pairBalance, setPairBalance] = useState<PairBalance>([
-    new U128(0),
-    new U128(0),
-    new U128(0),
-    new U128(0)
-  ]);
+
+  const [pairBalance, setPairBalance] = useState<PairBalance>();
 
   const fetchTradePairCallback = useCallback(
   async () => {
-    const tp = (await api.tradePairObject(tradePair)) as Option<Struct>;
+    const tp = await api.tradePairObject(tradePair);
 
-    if (tp && !tp.isNone) {
-      const newTpObject = JSON.parse(tp.unwrap().toString()) as TradePair;
+    if (tp) {
+      const newTpObject = JSON.parse(tp.toString()) as TradePair;
 
       setTpObject({ ...newTpObject });
     }
@@ -75,6 +71,9 @@ export const App: React.FC = () => {
       // const allAccounts = await web3Accounts();
 
       await api.init();
+      setPairBalance(
+           [new U128(api.registry!, 0), new U128(api.registry!, 0), new U128(api.registry!, 0), new U128(api.registry!, 0)]
+        );
       // if (allAccounts.length > 0) {
       //   const injector = await web3FromAddress(allAccounts[0].address);
       //   api.setSigner(injector.signer);
@@ -118,7 +117,7 @@ export const App: React.FC = () => {
         );
 
         setPairBalance(
-          balances ?? [new U128(0), new U128(0), new U128(0), new U128(0)]
+          balances ?? [new U128(api.registry!, 0), new U128(api.registry!, 0), new U128(api.registry!, 0), new U128(api.registry!, 0)]
         );
 
         // my orders and opened orders
